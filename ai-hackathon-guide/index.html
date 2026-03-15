@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Hackathon Guide — From Idea to Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f5f7;
+    --surface-2: #ebebef;
+    --border: #d1d1d6;
+    --text: #1a1a1a;
+    --text-dim: #333333;
+    --accent: #4338ca;
+    --accent-glow: rgba(67,56,202,0.07);
+    --warm: #b45309;
+    --warm-glow: rgba(180,83,9,0.05);
+    --green: #047857;
+    --rose: #be123c;
+    --cyan: #0e7490;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 18px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 2rem;
+    position: relative; overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; top: -30%; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulse 8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 1.5rem; position: relative;
+  }
+
+  .hero h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.03em;
+    position: relative; max-width: 900px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 1.25rem; color: var(--text-dim);
+    margin-top: 1.5rem; max-width: 640px;
+    position: relative; font-weight: 500;
+  }
+
+  .hero-meta {
+    margin-top: 3rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; color: var(--text-dim);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    position: relative;
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+    color: var(--text-dim); font-size: 0.8rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    animation: float 2.5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  .scroll-hint .arrow { font-size: 1.2rem; }
+
+  /* ── Navigation ── */
+  .toc {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    overflow-x: auto; white-space: nowrap;
+    display: flex; gap: 0.25rem; align-items: center;
+  }
+
+  .toc a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-decoration: none; padding: 0.4rem 0.8rem;
+    border-radius: 4px; transition: all 0.25s; flex-shrink: 0;
+  }
+
+  .toc a:hover, .toc a.active {
+    color: var(--text); background: var(--surface-2);
+  }
+
+  /* ── Content Structure ── */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  section { padding: 5rem 0; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: none; }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 0.75rem; display: block;
+  }
+
+  h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: -0.02em; margin-bottom: 2rem;
+  }
+
+  h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    margin-top: 3rem; margin-bottom: 1rem; color: var(--text);
+  }
+
+  h4 {
+    font-size: 0.95rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--warm); margin-top: 2.5rem; margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: var(--text-dim); margin-bottom: 1.25rem;
+    font-size: 1.125rem; font-weight: 500;
+  }
+
+  p strong { color: var(--text); font-weight: 700; }
+
+  /* ── Callout Boxes ── */
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem; margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  .callout.warm { border-left-color: var(--warm); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.rose { border-left-color: var(--rose); }
+  .callout.cyan { border-left-color: var(--cyan); }
+
+  .callout p { margin-bottom: 0; font-size: 1.05rem; }
+  .callout p:not(:last-child) { margin-bottom: 0.75rem; }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 0.5rem; display: block;
+  }
+  .callout.warm .callout-label { color: var(--warm); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.rose .callout-label { color: var(--rose); }
+  .callout.cyan .callout-label { color: var(--cyan); }
+
+  /* ── Stat Grid ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin: 2rem 0;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem; text-align: center;
+  }
+
+  .stat-card .number {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.4rem; font-weight: 800;
+    color: var(--text); line-height: 1; margin-bottom: 0.4rem;
+  }
+  .stat-card .number.accent { color: var(--accent); }
+  .stat-card .number.warm { color: var(--warm); }
+  .stat-card .number.green { color: var(--green); }
+  .stat-card .number.rose { color: var(--rose); }
+  .stat-card .number.cyan { color: var(--cyan); }
+
+  .stat-card .label {
+    font-size: 0.85rem; color: var(--text-dim);
+    letter-spacing: 0.03em; font-weight: 500;
+  }
+
+  /* ── Sub-topic pills ── */
+  .sub-topics {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  .sub-topic-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.05em;
+    padding: 0.35rem 0.75rem;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 100px; color: var(--text-dim);
+    cursor: pointer; transition: all 0.25s; text-decoration: none;
+  }
+  .sub-topic-pill:hover {
+    border-color: var(--accent); color: var(--text);
+    background: var(--accent-glow);
+  }
+
+  /* ── Pattern Diagram ── */
+  .pattern-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem 2rem; margin: 1.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem; color: var(--accent);
+    letter-spacing: 0.05em; text-align: center;
+    line-height: 2;
+  }
+
+  .pattern-diagram .flow-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--text-dim); margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* ── Capability Cards ── */
+  .cap-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem; margin: 2rem 0;
+  }
+
+  .cap-card {
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+    background: var(--surface);
+  }
+
+  .cap-card .cap-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .cap-card p { font-size: 1rem; margin-bottom: 0; }
+
+  /* ── Two Column ── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; margin: 2rem 0;
+  }
+
+  .col-card {
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+  }
+
+  .col-card.do-card { border-left: 3px solid var(--green); }
+  .col-card.dont-card { border-left: 3px solid var(--rose); }
+
+  .col-card .col-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .col-card.do-card .col-label { color: var(--green); }
+  .col-card.dont-card .col-label { color: var(--rose); }
+  .col-card p { font-size: 1rem; }
+
+  /* ── Era Table ── */
+  .era-table {
+    width: 100%; border-collapse: collapse; margin: 1.5rem 0;
+  }
+
+  .era-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); text-align: left;
+    padding: 0.75rem 1rem; border-bottom: 2px solid var(--text);
+  }
+
+  .era-table td {
+    padding: 0.75rem 1rem; font-size: 1.05rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim); font-weight: 500;
+  }
+
+  .era-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem; font-weight: 600;
+    color: var(--accent); white-space: nowrap; width: 140px;
+  }
+
+  /* ── Separator ── */
+  .sep { width: 60px; height: 2px; background: var(--border); margin: 3rem 0; }
+
+  /* ── Ideation Grid ── */
+  .ideation-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem; margin: 1.5rem 0;
+  }
+
+  .ideation-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+  }
+
+  .ideation-item .ideation-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    color: var(--accent); line-height: 1; flex-shrink: 0;
+  }
+
+  .ideation-item p { font-size: 1rem; margin: 0; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--text-dim); font-size: 0.9rem; font-weight: 500;
+  }
+
+  .footer .logo-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    color: var(--text); margin-bottom: 0.5rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .stat-grid, .cap-grid, .two-col, .ideation-grid { grid-template-columns: 1fr; }
+    section { padding: 3rem 0; }
+    .container { padding: 0 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <span class="hero-label">AI Strategy Series · 2026</span>
+  <h1>The <em>AI</em> Hackathon Guide</h1>
+  <p class="hero-sub">From idea to prototype. A comprehensive guide to the state of AI, the tools available today, and practical ideas for building AI-powered features during your hackathon.</p>
+  <span class="hero-meta">Prepared by Kosmas Karadimitriou · AI Tech Leader · March 2026</span>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <span class="arrow">↓</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ TOC ═══════════════════ -->
+<nav class="toc" id="toc">
+  <a href="#why-now">Why Hackathons</a>
+  <a href="#landscape">What Changed</a>
+  <a href="#capabilities">Capabilities</a>
+  <a href="#building-blocks">Building Blocks</a>
+  <a href="#toolkit">Tools & Frameworks</a>
+  <a href="#opportunities">Opportunities</a>
+  <a href="#ideation">Ideation</a>
+  <a href="#great-projects">Great Projects</a>
+  <a href="#closing">Go Build</a>
+</nav>
+
+<!-- ═══════════════════ CONTENT ═══════════════════ -->
+<main>
+
+<!-- ─── SECTION 1: Why Now ─── -->
+<section id="why-now">
+<div class="container">
+  <span class="section-number">01 — The Moment</span>
+  <h2>Why AI Hackathons Matter — and Why Now</h2>
+
+  <p>AI is changing software faster than any previous platform shift. The cost of building intelligent features has collapsed. Small teams can now build things that required entire AI departments a few years ago. This is not incremental improvement — it is a step-function change in what is possible.</p>
+
+  <h4>The new primitives</h4>
+  <p><strong>Large language models are a new compute layer for reasoning.</strong> Just as databases gave software persistent memory and APIs gave it connectivity, LLMs give software the ability to understand, generate, and reason about unstructured information. <strong>Agents are a new software primitive.</strong> They don't just respond — they plan, use tools, and execute multi-step workflows autonomously.</p>
+
+  <p>Every product is becoming AI-native. The question is no longer <em>whether</em> to use AI — it's how fast you can build with it.</p>
+
+  <div class="callout">
+    <span class="callout-label">The bottom line</span>
+    <p><strong>An AI hackathon is your team's opportunity to get ahead of that curve.</strong> Not in theory, but in practice — building real features, solving real problems, and learning by doing. The teams that experiment fastest will define what your product looks like in 12 months.</p>
+  </div>
+
+  <h4>The landscape is moving — and so must we</h4>
+  <p>The pace of change in AI is unlike anything most organizations have experienced. New models, new tools, and new capabilities are emerging on a weekly basis. What was cutting-edge six months ago is now a commodity. In this environment, traditional approaches to technology adoption — long evaluation cycles, committee-driven roadmaps, cautious pilots — simply can't keep up. Companies need new ways to quickly orient their teams, discover what's possible, and build muscle memory with these tools.</p>
+
+  <h4>Why a hackathon is the right tool for this moment</h4>
+  <p>An AI hackathon is one of the most effective ways an organization can accelerate its AI readiness — and not just for the technical outcomes. A well-run hackathon accomplishes several things at once:</p>
+
+  <p><strong>It shows everyone what's possible.</strong> Most people dramatically underestimate what AI can do today. When a team builds a working prototype in a few hours that would have taken weeks to develop traditionally, it rewires how the entire organization thinks about what's achievable.</p>
+
+  <p><strong>It's deeply educational.</strong> Reading about AI tools is one thing. Using them to solve a real problem is something else entirely. Hackathons compress months of passive learning into a single day of hands-on experience — for engineers and product managers alike.</p>
+
+  <p><strong>It builds enthusiasm and team cohesion.</strong> There's an energy that comes from building something together under time pressure, across disciplines, with the freedom to experiment. That energy carries forward long after the hackathon ends, creating internal champions who push AI adoption organically.</p>
+
+  <p><strong>Good ideas emerge.</strong> Some of the best product features in the industry started as hackathon projects. When you remove the constraints of sprint planning and roadmap politics and let smart people play with powerful tools, surprising things happen. Not every project will ship — but the ones that resonate often become real products.</p>
+
+  <p>According to the <a class="src" href="https://hai.stanford.edu/ai-index/2025-ai-index-report" target="_blank">Stanford AI Index 2025</a>, AI inference costs have dropped 280-fold in 18 months, and 78% of organizations are now using AI in at least one function. <a class="src" href="https://www.gartner.com" target="_blank">Gartner</a> projects that 40% of enterprise applications will embed AI agents by the end of this year. AI is demolishing the barriers between having an idea and implementing it. An AI hackathon is the fastest way to experience that firsthand.</p>
+</div>
+</section>
+
+<!-- ─── SECTION 2: What Has Changed ─── -->
+<section id="landscape">
+<div class="container">
+  <span class="section-number">02 — The Landscape</span>
+  <h2>What Has Changed in the Last 24 Months</h2>
+
+  <p>The AI landscape has shifted dramatically. What was experimental in 2023 is production-ready in 2026. Understanding this trajectory helps explain why now is the moment to build.</p>
+
+  <table class="era-table">
+    <thead>
+      <tr><th>Era</th><th>Capability</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pre-2022</td><td>Machine learning models for narrow, well-defined tasks — image classification, recommendation engines, fraud detection. Required specialized ML teams and months of training.</td></tr>
+      <tr><td>2022–2023</td><td>Large language models for text generation. ChatGPT launched and reached 100 million users in two months. AI became a mainstream tool overnight, but was limited to conversational Q&A.</td></tr>
+      <tr><td>2024–Today</td><td>AI agents with tool use, multimodal understanding, and autonomous workflow execution. Models reason step-by-step, call APIs, process documents and images, and complete multi-step tasks.</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Key concepts that matter for building</h4>
+  <p><strong>Reasoning models</strong> — AI that thinks step-by-step, breaking complex problems into manageable parts before answering. <strong>Tool calling</strong> — AI that takes actions in the real world: querying databases, calling APIs, sending messages. <strong>RAG (Retrieval-Augmented Generation)</strong> — AI grounded in your own data, not just its training set. <strong>Multimodal AI</strong> — systems that understand text, images, audio, and documents simultaneously. <strong>AI agents</strong> — autonomous workflows that plan, execute, and iterate.</p>
+
+  <div class="callout cyan">
+    <span class="callout-label">The shift</span>
+    <p><strong>AI is no longer just a feature — it can now run entire workflows.</strong> This is the difference between "add an AI chatbot" and "reimagine how the entire process works when intelligence is embedded at every step."</p>
+  </div>
+
+  <h4>The economics are staggering</h4>
+  <p>The <a class="src" href="https://hai.stanford.edu/ai-index/2025-ai-index-report" target="_blank">Stanford AI Index 2025</a> reports that the cost to query an AI model at GPT-3.5 quality dropped from <strong>$20 per million tokens to $0.07</strong> — a 280-fold reduction in 18 months. Meanwhile, frontier models like GPT-4o, Claude Opus, and Gemini have pushed capabilities far beyond what GPT-3.5 could do, adding reasoning, vision, tool use, and code execution. The result: what cost thousands of dollars to prototype in 2023 now costs cents.</p>
+
+  <p>Organizational AI adoption climbed from 55% in 2023 to 78% in 2024. U.S. private AI investment reached $109.1 billion. The AI agent market alone grew from $5.4 billion in 2024 to a projected <a class="src" href="https://www.demandsage.com/ai-agents-statistics/" target="_blank">$10.9 billion in 2026</a>, and is forecast to exceed $50 billion by 2030.</p>
+</div>
+</section>
+
+<!-- ─── SECTION 3: Capabilities ─── -->
+<section id="capabilities">
+<div class="container">
+  <span class="section-number">03 — What AI Can Do</span>
+  <h2>The AI Capability Landscape</h2>
+
+  <p>To generate strong hackathon ideas, teams need a clear mental model of what AI can realistically do today. Not what it might do in five years — what it can do <em>this week</em>, with available tools and APIs.</p>
+
+  <div class="cap-grid">
+    <div class="cap-card">
+      <div class="cap-label" style="color:var(--accent)">Understanding</div>
+      <p>Text, documents, conversations, images, audio. AI can read a 200-page PDF, watch a video, listen to a customer call, and extract structured insights from any of them.</p>
+    </div>
+    <div class="cap-card">
+      <div class="cap-label" style="color:var(--green)">Generation</div>
+      <p>Text, code, images, UI components. AI can draft emails, write production code, generate marketing assets, and scaffold entire application interfaces.</p>
+    </div>
+    <div class="cap-card">
+      <div class="cap-label" style="color:var(--warm)">Reasoning</div>
+      <p>Planning, summarization, analysis, decision support. AI can break down complex goals, synthesize large datasets, identify patterns, and recommend actions.</p>
+    </div>
+    <div class="cap-card">
+      <div class="cap-label" style="color:var(--cyan)">Acting</div>
+      <p>Calling APIs, using tools, executing workflows. AI can send messages, update records, trigger automations, and orchestrate multi-system processes end to end.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">The mental model</span>
+    <p><strong>AI = Understand + Reason + Act.</strong> If you can describe a task in those three terms — what information needs to be understood, what reasoning needs to happen, and what action should result — you've described something AI can likely help with.</p>
+  </div>
+
+  <h4>The models available today</h4>
+  <p>The leading frontier models — <a class="src" href="https://openai.com" target="_blank">OpenAI's GPT-4o</a>, <a class="src" href="https://www.anthropic.com" target="_blank">Anthropic's Claude</a>, and <a class="src" href="https://deepmind.google/technologies/gemini/" target="_blank">Google's Gemini</a> — all support text, images, documents, and tool calling out of the box. Open-source alternatives like <a class="src" href="https://llama.meta.com" target="_blank">Meta's Llama</a> and <a class="src" href="https://mistral.ai" target="_blank">Mistral</a> offer strong capabilities you can run on your own infrastructure. For hackathon purposes, the fastest path is typically an API call to a frontier model — you can have a working AI feature in minutes, not days.</p>
+
+  <p>Each of these models can read a 100-page document, analyze an image, write working code, summarize a conversation thread, or classify a support ticket — all through a single API call. The barrier to entry has never been lower.</p>
+</div>
+</section>
+
+<!-- ─── SECTION 4: Building Blocks ─── -->
+<section id="building-blocks">
+<div class="container">
+  <span class="section-number">04 — Architecture Patterns</span>
+  <h2>Practical AI Building Blocks</h2>
+
+  <p>Modern AI applications follow a small number of well-established architecture patterns. Understanding these patterns is the fastest way to go from "what should we build?" to "here's how we build it." These are the three patterns you'll use most during the hackathon.</p>
+
+  <div class="sub-topics">
+    <a class="sub-topic-pill" href="#p-simple">Simple AI Feature</a>
+    <a class="sub-topic-pill" href="#p-rag">RAG</a>
+    <a class="sub-topic-pill" href="#p-agents">AI Agents</a>
+    <a class="sub-topic-pill" href="#p-mcp">MCP Servers</a>
+  </div>
+
+  <h3 id="p-simple">Pattern 1: Simple AI Feature</h3>
+
+  <div class="pattern-diagram">
+    <span class="flow-label">Architecture</span>
+    User → Prompt → LLM → Response
+  </div>
+
+  <p>The simplest and most common pattern. A user action triggers a prompt to a language model, and the response is surfaced directly. Behind the scenes, the key work is in <strong>prompt engineering</strong> — crafting the system instructions, providing examples, and structuring the input so the model returns consistently useful output. A well-written prompt can be the difference between a gimmick and a genuinely useful feature.</p>
+
+  <p>This pattern powers a wide range of applications: <strong>reply suggestions</strong> that draft responses based on conversation context, <strong>text summarization</strong> that condenses long documents into key takeaways, <strong>content rewriting</strong> that adjusts tone or format, <strong>classification</strong> that routes tickets or categorizes feedback, and <strong>sentiment analysis</strong> that detects whether a customer is happy or frustrated. The common thread: unstructured text goes in, structured value comes out.</p>
+
+  <p><strong>If you're new to AI, start here.</strong> A single API call to any frontier model is all you need. You can build a working prototype in under an hour — and for many real-world use cases, this pattern alone delivers significant value without any additional complexity.</p>
+
+  <div class="sep"></div>
+
+  <h3 id="p-rag">Pattern 2: Retrieval-Augmented Generation (RAG)</h3>
+
+  <div class="pattern-diagram">
+    <span class="flow-label">Architecture</span>
+    User Question → Vector Search → Relevant Documents → LLM Generates Answer
+  </div>
+
+  <p>RAG solves the biggest limitation of Pattern 1: the model only knows what it was trained on. Your company's internal documents, product specs, customer conversations, and knowledge base articles aren't in any public training set. RAG bridges that gap by <strong>retrieving relevant information from your own data</strong> at query time and injecting it into the prompt, so the model's response is grounded in facts you control.</p>
+
+  <p>The technical flow works like this: your documents are split into chunks and converted into numerical representations called <strong>embeddings</strong>, then stored in a vector database. When a user asks a question, the question is also embedded, and the database returns the most semantically similar chunks. These chunks become the context the LLM uses to generate its answer — with references to the source material.</p>
+
+  <p>This pattern powers <strong>knowledge assistants</strong> that answer questions about internal policies or product documentation, <strong>support bots</strong> grounded in your actual help center content, <strong>onboarding tools</strong> that surface relevant information for new employees, and <strong>research copilots</strong> that search across large document collections. The key advantage over a simple chatbot: RAG systems cite their sources, which makes them trustworthy enough for real business use.</p>
+
+  <div class="sep"></div>
+
+  <h3 id="p-agents">Pattern 3: AI Agents</h3>
+
+  <div class="pattern-diagram">
+    <span class="flow-label">Architecture</span>
+    User Goal → AI Plans Steps → Uses Tools / APIs → Completes Workflow
+  </div>
+
+  <p>Patterns 1 and 2 are <em>reactive</em> — the user asks, the AI responds. Agents are fundamentally different: they are <strong>goal-oriented systems that plan and execute autonomously</strong>. You give an agent an objective ("research our top 5 competitors and summarize their pricing changes this quarter"), and the agent decides what steps to take, which tools to use, and how to iterate until the goal is met.</p>
+
+  <p>Under the hood, an agent typically runs in a <strong>reasoning loop</strong>: it observes the current state, decides the next action, executes it (often by calling an external tool or API), evaluates the result, and repeats. This loop — sometimes called ReAct (Reason + Act) — is what gives agents their power. They can search the web, query databases, read documents, send emails, create tickets, and chain all of these actions together in a single workflow.</p>
+
+  <p>This pattern powers <strong>automated research</strong> that gathers and synthesizes information from multiple sources, <strong>CRM automation</strong> that updates records and triggers follow-ups based on conversation context, <strong>ticket resolution</strong> that diagnoses issues, looks up solutions, and drafts responses, and <strong>multi-system orchestration</strong> where an agent coordinates across tools that don't natively talk to each other. The shift from "AI that answers questions" to "AI that completes work" is the defining transition of 2025–2026.</p>
+
+  <div class="sep"></div>
+
+  <h3 id="p-mcp">Pattern 4: MCP Servers — The Interface for Agents</h3>
+
+  <div class="pattern-diagram">
+    <span class="flow-label">Architecture</span>
+    Any AI Agent → MCP Protocol → MCP Server → Any Tool, Database, or API
+  </div>
+
+  <p>The three patterns above all share a dependency: AI must connect to external systems to be useful. Before 2024, each connection required custom code — a bespoke integration for every tool and every AI app. The <a class="src" href="https://modelcontextprotocol.io" target="_blank">Model Context Protocol (MCP)</a>, introduced by <a class="src" href="https://www.anthropic.com/news/model-context-protocol" target="_blank">Anthropic in November 2024</a>, solves this with an open standard that works like <strong>USB-C for AI</strong>: one universal connector between any AI model and any data source or tool.</p>
+
+  <p>The adoption has been swift. <a class="src" href="https://en.wikipedia.org/wiki/Model_Context_Protocol" target="_blank">OpenAI and Google DeepMind adopted MCP in 2025</a>. In December 2025, the protocol was donated to the Linux Foundation, co-governed by Anthropic, Block, and OpenAI. Thousands of MCP servers already exist for tools like GitHub, Slack, databases, and CRMs — and all major agent frameworks support it natively.</p>
+
+  <p>Here's the key idea: <strong>today's web UI was built for humans. MCP is the interface being built for agents.</strong> Humans interact with software through screens, buttons, and forms. Agents interact through MCP — discovering available capabilities, understanding inputs and outputs, and invoking tools programmatically. As the world fills with AI agents, the organizations that expose their systems through MCP will be the ones those agents can work with. This isn't just a technical convenience — it's a fundamental shift in software architecture.</p>
+
+  <div class="callout cyan">
+    <span class="callout-label">The bigger picture</span>
+    <p><strong>The web gave us UI for humans. APIs gave us interfaces for applications. MCP is giving us interfaces for AI agents.</strong> Companies that build this connective tissue now will have a durable advantage as the agentic era accelerates.</p>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-label">The key insight</span>
+    <p><strong>The future of software is workflows run by AI.</strong> Each of these patterns represents increasing sophistication — but also increasing value. Start with Pattern 1 during the hackathon, and layer in RAG or agent capabilities as your prototype matures.</p>
+  </div>
+
+</div>
+</section>
+
+<!-- ─── SECTION 5: Tools & Frameworks ─── -->
+<section id="toolkit">
+<div class="container">
+  <span class="section-number">05 — Tools & Frameworks</span>
+  <h2>The AI Builder's Toolkit</h2>
+
+  <p>One of the most important things to understand about AI in 2026 is that <strong>you don't need to be a machine learning engineer to build with it.</strong> A rich ecosystem of tools exists across every skill level — from product managers who've never written code to senior engineers building production systems. Here's what's available.</p>
+
+  <h4>AI platforms & their power features</h4>
+  <p>The major AI providers ship more than APIs — they offer complete environments where non-technical users can build AI-powered experiences without code.</p>
+
+  <p><a class="src" href="https://claude.ai" target="_blank"><strong>Claude Artifacts</strong></a> — Create interactive apps, documents, and visualizations directly inside a Claude conversation. No coding environment needed.</p>
+  <p><a class="src" href="https://claude.ai" target="_blank"><strong>Claude Cowork</strong></a> — Anthropic's desktop automation tool that lets Claude operate your computer, browse the web, and complete multi-step workflows on your behalf.</p>
+  <p><a class="src" href="https://chatgpt.com" target="_blank"><strong>Custom GPTs</strong></a> — OpenAI's no-code builder for creating specialized ChatGPT assistants with custom instructions, knowledge files, and tool integrations.</p>
+  <p><a class="src" href="https://notebooklm.google" target="_blank"><strong>NotebookLM</strong></a> — Google's AI research assistant that grounds responses in your uploaded documents. Excellent for knowledge-heavy tasks and generates podcast-style audio summaries.</p>
+  <p><a class="src" href="https://aistudio.google.com" target="_blank"><strong>Google AI Studio</strong></a> — Playground for prototyping with Gemini models, supporting text, images, audio, and video in a single interface.</p>
+
+  <h4>No-code app builders</h4>
+  <p>These platforms let you build complete web applications by describing what you want in plain English. Ideal for PMs and designers who want to prototype fast.</p>
+
+  <p><a class="src" href="https://lovable.dev" target="_blank"><strong>Lovable</strong></a> — Generates full-stack React apps from natural language prompts, with built-in database, auth, and one-click deploy. The breakout tool of 2025–26.</p>
+  <p><a class="src" href="https://bolt.new" target="_blank"><strong>Bolt.new</strong></a> — Browser-based AI app builder by StackBlitz that generates, runs, and deploys full-stack apps entirely in the browser — no local setup needed.</p>
+  <p><a class="src" href="https://firebase.google.com/products/firebase-studio" target="_blank"><strong>Firebase Studio</strong></a> — Google's AI-powered workspace that pairs Gemini with Firebase infrastructure for app prototyping and deployment.</p>
+  <p><a class="src" href="https://www.replit.com" target="_blank"><strong>Replit</strong></a> — Cloud IDE with an AI agent that can build, debug, and deploy apps collaboratively. Great for rapid experimentation without any local environment.</p>
+  <p><a class="src" href="https://abacus.ai" target="_blank"><strong>Abacus.AI</strong></a> — Enterprise-focused platform for building AI agents and custom LLM applications with a visual interface and built-in model hosting.</p>
+
+  <h4>Automation & integration platforms</h4>
+  <p>These tools let non-engineers connect AI to existing business systems — no code required, just visual workflows.</p>
+
+  <p><a class="src" href="https://zapier.com" target="_blank"><strong>Zapier</strong></a> — Connects 7,000+ apps with AI-powered automation. Build workflows like "when a support ticket arrives, use AI to classify it and route it to the right team."</p>
+  <p><a class="src" href="https://n8n.io" target="_blank"><strong>n8n</strong></a> — Open-source workflow automation with a visual canvas, hundreds of integrations, and native AI nodes for LLM calls. Self-hostable for full control.</p>
+  <p><a class="src" href="https://make.com" target="_blank"><strong>Make</strong></a> — Visual automation platform with advanced branching, error handling, and AI integrations for building sophisticated multi-step workflows.</p>
+
+  <h4>AI APIs & model providers</h4>
+  <p>The foundational building blocks. These APIs give you direct access to frontier AI models — send a prompt, get a response. Everything else in this toolkit is built on top of these.</p>
+
+  <p><a class="src" href="https://platform.openai.com" target="_blank"><strong>OpenAI API</strong></a> — Access to GPT-4o, o1, and the latest reasoning models. Supports text, images, audio, tool calling, and structured outputs.</p>
+  <p><a class="src" href="https://docs.anthropic.com" target="_blank"><strong>Anthropic API</strong></a> — Access to the Claude model family. Known for strong reasoning, long context windows (up to 200K tokens), and careful safety design.</p>
+  <p><a class="src" href="https://ai.google.dev/docs" target="_blank"><strong>Google Gemini API</strong></a> — Access to Gemini models with native multimodal support — text, images, audio, and video in a single call.</p>
+  <p><a class="src" href="https://llama.meta.com" target="_blank"><strong>Meta Llama</strong></a> — Open-source model family you can run on your own infrastructure. Strong performance with full control over data and deployment.</p>
+  <p><a class="src" href="https://mistral.ai" target="_blank"><strong>Mistral</strong></a> — European open-source models offering high performance at lower cost. Available via API or self-hosted.</p>
+  <p><a class="src" href="https://openrouter.ai" target="_blank"><strong>OpenRouter</strong></a> — A unified API that gives you access to hundreds of models from every major provider (OpenAI, Anthropic, Google, Meta, Mistral, and more) through a single endpoint. Great for hackathons where teams want to experiment with different models without managing multiple API keys.</p>
+
+  <h4>Developer frameworks & orchestration</h4>
+  <p>For teams building deeper AI features, these frameworks handle the plumbing — prompt chaining, memory, tool calling, agent loops, and workflow orchestration.</p>
+
+  <p><a class="src" href="https://python.langchain.com" target="_blank"><strong>LangChain</strong></a> — The most popular framework for building LLM applications (87K+ GitHub stars). Handles prompt chaining, memory, tool calling, and RAG pipelines.</p>
+  <p><a class="src" href="https://www.langchain.com/langgraph" target="_blank"><strong>LangGraph</strong></a> — Extension of LangChain for building stateful agent workflows as directed graphs. The go-to for complex agent logic with loops and branching.</p>
+  <p><a class="src" href="https://www.langflow.org" target="_blank"><strong>Langflow</strong></a> — Visual drag-and-drop builder for LangChain pipelines. Build RAG systems and agent workflows without writing code, then export as Python.</p>
+  <p><a class="src" href="https://www.llamaindex.ai" target="_blank"><strong>LlamaIndex</strong></a> — Specialized framework for connecting LLMs to your data. The best choice for RAG applications that need to query documents, databases, or APIs.</p>
+  <p><a class="src" href="https://www.crewai.com" target="_blank"><strong>CrewAI</strong></a> — Role-based multi-agent framework (44K+ GitHub stars). Define teams of agents with specific roles that collaborate on complex tasks.</p>
+  <p><a class="src" href="https://openai.github.io/openai-agents-python/" target="_blank"><strong>OpenAI Agents SDK</strong></a> — Lightweight Python SDK for building agents with tool calling and guardrails. A working agent in under 20 lines of code.</p>
+  <p><a class="src" href="https://dify.ai" target="_blank"><strong>Dify</strong></a> — Open-source platform for building AI apps with a visual editor, built-in RAG, agent tools, and workflow orchestration. Deploy as API or chatbot.</p>
+  <p><a class="src" href="https://ai.google.dev/gemini-api/docs/file-search" target="_blank"><strong>Gemini File Search</strong></a> — Google's fully managed RAG system built into the Gemini API. Upload documents, and the API handles chunking, embedding, retrieval, and cited answers — no vector database or pipeline setup needed.</p>
+
+  <h4>Vector databases</h4>
+  <p>The storage layer for RAG applications. These databases store document embeddings and retrieve the most relevant content for any query — search by meaning, not just keywords.</p>
+
+  <p><a class="src" href="https://www.trychroma.com" target="_blank"><strong>Chroma</strong></a> — Lightweight, open-source embedding database designed to be the easiest way to get started with vector search. Runs locally or in the cloud.</p>
+  <p><a class="src" href="https://www.pinecone.io" target="_blank"><strong>Pinecone</strong></a> — Fully managed vector database with a generous free tier. The most popular hosted option — upload embeddings, query by meaning, scale automatically.</p>
+  <p><a class="src" href="https://weaviate.io" target="_blank"><strong>Weaviate</strong></a> — Open-source vector database with built-in vectorization and hybrid search combining keyword and semantic matching.</p>
+  <p><a class="src" href="https://github.com/facebookresearch/faiss" target="_blank"><strong>FAISS</strong></a> — Meta's open-source library for efficient similarity search. Runs entirely in-memory — fast, lightweight, and ideal for hackathon-scale prototypes.</p>
+  <p><a class="src" href="https://qdrant.tech" target="_blank"><strong>Qdrant</strong></a> — Open-source vector database with rich filtering capabilities. Supports combining vector search with metadata filters for precise retrieval.</p>
+  <p><a class="src" href="https://milvus.io" target="_blank"><strong>Milvus</strong></a> — Open-source vector database built for scale. Handles billions of vectors with GPU-accelerated search — overkill for a hackathon, but good to know.</p>
+
+  <h4>AI-powered coding tools</h4>
+  <p>For engineers, these tools turn AI into a pair programmer that writes, edits, and debugs code alongside you.</p>
+
+  <p><a class="src" href="https://claude.ai/code" target="_blank"><strong>Claude Code</strong></a> — Anthropic's command-line coding agent. Give it a task in natural language and it navigates your codebase, writes code, runs tests, and commits — all from the terminal.</p>
+  <p><a class="src" href="https://cursor.com" target="_blank"><strong>Cursor</strong></a> — AI-native code editor (VS Code fork) with deep codebase awareness. Edits across multiple files, explains code, and generates implementations from descriptions.</p>
+  <p><a class="src" href="https://windsurf.com" target="_blank"><strong>Windsurf</strong></a> — AI coding IDE with "Cascade" flows that handle multi-step coding tasks autonomously, maintaining context across your entire project.</p>
+  <p><a class="src" href="https://www.antigravity.dev" target="_blank"><strong>Antigravity</strong></a> — AI coding environment designed for building full applications with an agent that can scaffold, iterate, and deploy projects end to end.</p>
+  <p><a class="src" href="https://github.com/features/copilot" target="_blank"><strong>GitHub Copilot</strong></a> — AI code completion integrated into VS Code and JetBrains. Inline suggestions and chat — best as an accelerator within your existing IDE workflow.</p>
+
+  <div class="callout">
+    <span class="callout-label">Choosing your stack</span>
+    <p><strong>Match the tool to the builder.</strong> Product managers should start with no-code builders or foundation model features — you can have a working prototype in minutes. Engineers should pick the framework that fits their architecture needs. Cross-functional teams should consider automation platforms as the glue layer. The best hackathon projects often combine tools: a PM builds the concept in Lovable while an engineer wires the AI logic with LangChain.</p>
+  </div>
+</div>
+</section>
+
+<!-- ─── SECTION 6: Opportunities ─── -->
+<section id="opportunities">
+<div class="container">
+  <span class="section-number">06 — Applications</span>
+  <h2>AI Opportunities Hiding in Plain Sight</h2>
+
+  <p>The most impactful AI features aren't abstract — they solve specific problems that real users face every day. Here's where AI can create immediate, tangible value across your product and operations.</p>
+
+  <h4>Customer communication</h4>
+  <ul style="list-style: none; padding: 0;">
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Intelligent ticket routing</strong> — build a Zapier/n8n workflow that reads incoming support messages, classifies them by topic and urgency using an LLM, and routes them to the right team automatically</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Smart reply drafting with tone control</strong> — a tool that takes a customer message plus internal context (account status, past interactions) and drafts a reply in the company's voice, with toggles for tone (empathetic, direct, escalation)</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Churn risk alerting</strong> — an agent that monitors recent customer conversations, scores sentiment trends over time, and flags accounts showing declining satisfaction before they cancel</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>FAQ auto-generator</strong> — feed your support ticket history into an LLM and have it identify the most common questions, then generate a draft FAQ or help center article for each one</li>
+  </ul>
+
+  <h4>Sales enablement</h4>
+  <ul style="list-style: none; padding: 0;">
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Personalized follow-up drafter</strong> — an agent that reads a sales call transcript or email thread, identifies key discussion points and commitments, and drafts a tailored follow-up email ready to send</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Competitor battlecard generator</strong> — a RAG tool that ingests your competitive intelligence docs, then answers rep questions like "how do we compare to X on pricing?" with sourced, up-to-date responses</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Deal risk scorer</strong> — analyze CRM data and recent communications to flag deals that are going cold, with a brief explanation of why (e.g., "no reply in 12 days, last sentiment was neutral")</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Prospect research assistant</strong> — given a company name, automatically pull public information (website, recent news, LinkedIn) and generate a one-page briefing for a sales rep before a call</li>
+  </ul>
+
+  <h4>Internal productivity</h4>
+  <ul style="list-style: none; padding: 0;">
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Automated documentation from code changes</strong> — a Claude Code skill or GitHub Action that reads a PR diff and auto-generates or updates the relevant section of internal documentation</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Internal knowledge chatbot</strong> — a RAG-powered assistant that answers employee questions grounded in your company wiki, Confluence pages, or shared drives — with source citations</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Standup report generator</strong> — an agent that pulls your team's recent commits, Jira updates, and Slack messages, then drafts a daily standup summary or weekly status report</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Onboarding buddy</strong> — a chatbot trained on your onboarding docs, org chart, and HR policies that new hires can ask anything — "where do I find the VPN setup guide?" or "who owns the billing service?"</li>
+  </ul>
+
+  <h4>Product intelligence</h4>
+  <ul style="list-style: none; padding: 0;">
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Feature request mining</strong> — process a backlog of support tickets or feedback forms with an LLM to extract, cluster, and rank the most-requested features, with representative quotes</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Automated insight discovery</strong> — build a pipeline that ingests your customer interaction data, identifies recurring pain points or usage patterns, and generates a weekly digest for the product team</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>Release notes writer</strong> — given a set of merged PRs or Jira tickets for a release, auto-generate customer-facing release notes in plain language, categorized by feature area</li>
+    <li style="margin-bottom: 0.75rem; padding-left: 1.2rem; position: relative;"><span style="position: absolute; left: 0; color: var(--accent);">◆</span> <strong>NPS response analyzer</strong> — take raw NPS survey responses, classify them by theme (pricing, UX, performance, support), score sentiment, and produce an executive summary with actionable takeaways</li>
+  </ul>
+
+  <div class="callout warm">
+    <span class="callout-label">Hackathon guidance</span>
+    <p><strong>Pick one of these areas and go deep.</strong> The best hackathon projects solve a narrow, specific problem extremely well — not a broad category vaguely. Ask: "What's one thing our users (or our team) do every day that involves reading, writing, or deciding — and how could AI make it 10× better?"</p>
+  </div>
+
+
+</div>
+</section>
+
+<!-- ─── SECTION 6: Ideation Framework ─── -->
+<section id="ideation">
+<div class="container">
+  <span class="section-number">07 — Ideation</span>
+  <h2>How to Think About Hackathon Ideas</h2>
+
+  <p>Not every workflow is a good fit for AI. The best hackathon ideas target workflows with specific characteristics that make them ripe for intelligent automation.</p>
+
+  <h4>The AI Opportunity Framework</h4>
+  <p>Look for workflows that have one or more of these properties:</p>
+
+  <div class="ideation-grid">
+    <div class="ideation-item">
+      <div class="ideation-num">1</div>
+      <div><p><strong>Lots of text or conversation.</strong> Any workflow where humans spend time reading, writing, or processing unstructured information is a natural fit for LLMs.</p></div>
+    </div>
+    <div class="ideation-item">
+      <div class="ideation-num">2</div>
+      <div><p><strong>Repetitive decision-making.</strong> If the same type of judgment call is made dozens of times a day — triage, categorization, approval — AI can handle the routine cases and escalate the edge cases.</p></div>
+    </div>
+    <div class="ideation-item">
+      <div class="ideation-num">3</div>
+      <div><p><strong>Manual research.</strong> Any time someone gathers information from multiple sources to make a decision, RAG and agents can dramatically accelerate the process.</p></div>
+    </div>
+    <div class="ideation-item">
+      <div class="ideation-num">4</div>
+      <div><p><strong>Slow processes.</strong> Workflows with long cycle times — especially those that involve waiting for human handoffs — are candidates for agent-driven orchestration.</p></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">The simple test</span>
+    <p><strong>If a task involves reading, writing, or deciding — AI can likely help.</strong> Apply this filter to every workflow you touch, and you'll generate more ideas than you can build in a week.</p>
+  </div>
+
+  <h4>Idea starters by function</h4>
+  <p><strong>For product managers:</strong> Take any feature request backlog and ask: "Which of these could be partially or fully solved by an LLM reading the input and generating the output?" Customer onboarding flows, help center content, status notifications — all are candidates.</p>
+  <p><strong>For engineers:</strong> Look at the most tedious part of your daily workflow. Code review summaries, log analysis, test generation, incident triage, documentation updates — if you spend more than 30 minutes a day on it and it involves reading text, it's a hackathon project.</p>
+  <p><strong>For cross-functional teams:</strong> Map a complete user journey from first contact to resolution. Identify every handoff where someone reads, decides, or writes. Each of those is a potential AI intervention point.</p>
+</div>
+</section>
+
+<!-- ─── SECTION 7: Great Projects ─── -->
+<section id="great-projects">
+<div class="container">
+  <span class="section-number">08 — What Good Looks Like</span>
+  <h2>What Makes a Great Hackathon Project</h2>
+
+  <p>The best hackathon projects share a common DNA. They're not the most technically ambitious — they're the most focused, the most visible, and the most connected to a real problem.</p>
+
+  <div class="two-col">
+    <div class="col-card do-card">
+      <div class="col-label">✓ What to aim for</div>
+      <p><strong>Small scope.</strong> A focused problem, not a platform. You have hours, not months.</p>
+      <p><strong>Real user problem.</strong> Something your customers or team members actually face today.</p>
+      <p><strong>Visible impact.</strong> A clear before-and-after that anyone can understand in 30 seconds.</p>
+      <p><strong>Demo-able prototype.</strong> Show, don't tell. A working demo beats a slide deck every time.</p>
+    </div>
+    <div class="col-card dont-card">
+      <div class="col-label">✗ What to avoid</div>
+      <p><strong>Massive architecture projects.</strong> You don't need microservices. You need a prototype.</p>
+      <p><strong>Perfect models.</strong> Good enough is great. Fine-tuning can come later.</p>
+      <p><strong>Overengineering.</strong> Prototype speed over production polish. Duct tape is encouraged.</p>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-label">The goal</span>
+    <p><strong>Build something surprising in a short time.</strong> The hackathon isn't about shipping production code — it's about proving that an idea works, that AI can solve this problem, and that it's worth investing in further.</p>
+  </div>
+
+  <h4>Suggested judging criteria</h4>
+  <p><strong>User impact (40%):</strong> Does this solve a real problem? Can you show a clear before-and-after? Would a user actually want this? <strong>Feasibility (25%):</strong> How realistic is it to ship this as a real feature? Is the AI output reliable enough? <strong>Creativity (20%):</strong> Does this surprise us? Is this a novel application of AI that we hadn't considered? <strong>Demo quality (15%):</strong> Can you walk us through a working prototype in under 3 minutes? The best demos tell a story: here's the problem, here's what happens now, here's how AI changes it.</p>
+</div>
+</section>
+
+<!-- ─── SECTION 8: Closing ─── -->
+<section id="closing">
+<div class="container">
+  <span class="section-number">09 — What's Next</span>
+  <h2>Go Build</h2>
+
+  <p>AI will transform every product. The only question is who builds it first. The teams that experiment fastest will win — not because they get lucky, but because they develop the intuition, the muscle memory, and the pattern recognition that comes from building real things with real tools.</p>
+
+  <p>Hackathons are the fastest way to learn. There are no wrong answers today. Every failed experiment teaches you something that reading an article or watching a demo never could. The gap between companies that are building with AI and companies that are evaluating AI is growing wider every month.</p>
+
+  <div class="callout">
+    <span class="callout-label">Closing thought</span>
+    <p><strong>The most important thing is not predicting the future of AI — it's building with it.</strong> Today is your chance to build something real, learn something new, and shape what your product looks like in the year ahead. Make it count.</p>
+  </div>
+</div>
+</section>
+
+</main>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<div class="footer">
+  <div class="logo-text">The AI Hackathon Guide</div>
+  <p>Prepared by Kosmas Karadimitriou · AI Tech Leader · March 2026</p>
+</div>
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.toc a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => link.classList.remove('active'));
+      const activeLink = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -75% 0px' });
+
+sections.forEach(section => observer.observe(section));
+
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.callout, .stat-grid, .cap-grid, .pattern-diagram, .ideation-grid, .two-col, h3, h4').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  fadeObserver.observe(el);
+});
+</script>
+
+</body>
+</html>
